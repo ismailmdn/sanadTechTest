@@ -24,4 +24,3 @@ Connect the validated backend API to the frontend application to fetch and displ
 Infinite Scroll Implementation
 Implement infinite scrolling on the frontend using the Intersection Observer API, enabling automatic data loading as the user scrolls.
 
-This step-by-step approach ensures reliability, scalability, and maintainability while keeping backend and frontend development well-organized.
