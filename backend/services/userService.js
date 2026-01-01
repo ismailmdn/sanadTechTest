@@ -6,7 +6,7 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export const getUsersFromFile = async (cursor, limit) => {
+export const getUsersFromFile = async (cursor, limit, searchQuery = '') => {
   const filePath = join(__dirname, '..', 'usernames.txt');
   const stream = fs.createReadStream(filePath);
   const rl = readline.createInterface({
@@ -15,16 +15,24 @@ export const getUsersFromFile = async (cursor, limit) => {
   });
 
   let index = 0;
+  let matchedCount = 0;
   const users = [];
+  const searchLower = searchQuery.toLowerCase().trim();
 
   for await (const line of rl) {
-    if (index >= cursor && users.length < limit) {
-      const username = line.trim();
-      if (username) {
-        users.push({
-          id: index,
-          username
-        });
+    const username = line.trim();
+    
+    if (username) {
+      const matchesSearch = !searchLower || username.toLowerCase().startsWith(searchLower);
+      
+      if (matchesSearch) {
+        if (matchedCount >= cursor && users.length < limit) {
+          users.push({
+            id: index,
+            username
+          });
+        }
+        matchedCount++;
       }
     }
 

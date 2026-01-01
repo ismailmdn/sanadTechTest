@@ -67,6 +67,7 @@ export const validatePagination = (req, res, next) => {
   
   req.validatedCursor = cursorValidation.cursor;
   req.validatedLimit = limitValidation.limit;
+  req.searchQuery = req.query.searchquery || '';
   
   next();
 };

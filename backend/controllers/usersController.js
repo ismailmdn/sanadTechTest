@@ -4,8 +4,9 @@ export const getUsers = async (req, res) => {
   try {
     const cursor = req.validatedCursor;
     const limit = req.validatedLimit;
+    const searchQuery = req.searchQuery || '';
 
-    const users = await getUsersFromFile(cursor, limit);
+    const users = await getUsersFromFile(cursor, limit, searchQuery);
 
     const nextCursor =
       users.length < limit ? null : cursor + users.length;

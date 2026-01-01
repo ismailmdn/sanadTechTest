@@ -28,7 +28,19 @@ describe('GET /users', () => {
 
   beforeEach(() => {
     mockGetUsersFromFile.mockClear();
-    mockGetUsersFromFile.mockImplementation(async (cursor, limit) => {
+    mockGetUsersFromFile.mockImplementation(async (cursor, limit, searchQuery = '') => {
+      if (searchQuery && searchQuery.trim()) {
+        const allUsers = [];
+        for (let i = 0; i < MOCK_TOTAL_USERS; i++) {
+          allUsers.push({ id: i, username: `User ${i}` });
+        }
+        const filteredUsers = allUsers.filter(user => 
+          user.username.toLowerCase().startsWith(searchQuery.toLowerCase())
+        );
+        const startIndex = cursor;
+        const endIndex = Math.min(startIndex + limit, filteredUsers.length);
+        return filteredUsers.slice(startIndex, endIndex);
+      }
       return generateMockUsers(cursor, limit, MOCK_TOTAL_USERS);
     });
   });
@@ -44,7 +56,7 @@ describe('GET /users', () => {
       expect(response.body).toHaveProperty('hasMore');
       expect(Array.isArray(response.body.users)).toBe(true);
       expect(response.body.users.length).toBeGreaterThan(0);
-      expect(mockGetUsersFromFile).toHaveBeenCalledWith(0, 50);
+      expect(mockGetUsersFromFile).toHaveBeenCalledWith(0, 50, '');
     });
 
     test('should return users with custom limit and cursor', async () => {
@@ -56,7 +68,7 @@ describe('GET /users', () => {
 
       expect(response.body.users.length).toBeLessThanOrEqual(limit);
       expect(response.body.users[0].id).toBe(cursor);
-      expect(mockGetUsersFromFile).toHaveBeenCalledWith(cursor, limit);
+      expect(mockGetUsersFromFile).toHaveBeenCalledWith(cursor, limit, '');
     });
   });
 
@@ -107,7 +119,7 @@ describe('GET /users', () => {
         .expect(200);
 
       expect(response.body.users.length).toBeGreaterThan(0);
-      expect(mockGetUsersFromFile).toHaveBeenCalledWith(0, 50);
+      expect(mockGetUsersFromFile).toHaveBeenCalledWith(0, 50, '');
     });
 
     test('should cap limit at maximum value', async () => {
@@ -116,7 +128,7 @@ describe('GET /users', () => {
         .expect(200);
 
       expect(response.body.users.length).toBeLessThanOrEqual(1000);
-      expect(mockGetUsersFromFile).toHaveBeenCalledWith(0, 1000);
+      expect(mockGetUsersFromFile).toHaveBeenCalledWith(0, 1000, '');
     });
   });
 
