@@ -37,3 +37,7 @@ This is the followed steps in the development of this project:
 ### Infinite Scroll Implementation
 - Implement infinite scrolling on the frontend using the Intersection Observer API, enabling automatic data loading as the user scrolls.  
 - Add the feature of filtering by a menu on the frontend and adjust the backend to support it.
+
+### Add search bar for improved data navigation
+- Reuse the existing `userService` service.
+- Use a text-based search query to filter users.
