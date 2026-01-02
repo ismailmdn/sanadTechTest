@@ -48,6 +48,52 @@ h1 {
   box-shadow: 0 2px 8px rgba(100, 108, 255, 0.3);
 }
 
+.search-container {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 1rem 3rem 1rem 1.25rem;
+  font-size: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  border-color: #646cff;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.clear-search {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.clear-search:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
 .no-results {
   text-align: center;
   padding: 3rem;

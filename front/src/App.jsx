@@ -10,12 +10,14 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedLetter, setSelectedLetter] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const [pagination, setPagination] = useState({
     nextCursor: null,
     hasMore: false
   })
   const sectionAppeared = useRef(null)
   const loadingRef = useRef(false)
+  const debounceTimerRef = useRef(null)
 
   const fetchUsers = useCallback(async (cursor = 0, limit = 50, append = false, searchQuery = '') => {
     if (loadingRef.current) return
@@ -56,20 +58,39 @@ function App() {
   }, [])
 
   useEffect(() => {
+    const searchQuery = searchTerm.trim() || selectedLetter
     setUsers([])
     setPagination({ nextCursor: null, hasMore: false })
-    fetchUsers(0, 50, false, selectedLetter)
-  }, [selectedLetter, fetchUsers])
+    
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+    
+    if (searchTerm.trim()) {
+      debounceTimerRef.current = setTimeout(() => {
+        fetchUsers(0, 50, false, searchTerm.trim())
+      }, 300)
+    } else {
+      fetchUsers(0, 50, false, selectedLetter)
+    }
+    
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [selectedLetter, searchTerm, fetchUsers])
 
   useEffect(() => {
     if (!pagination.hasMore || !pagination.nextCursor) {
       return
     }
 
+    const searchQuery = searchTerm.trim() || selectedLetter
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && pagination.hasMore && pagination.nextCursor !== null && !loadingRef.current) {
-          fetchUsers(pagination.nextCursor, 50, true, selectedLetter)
+          fetchUsers(pagination.nextCursor, 50, true, searchQuery)
         }
       },
       { threshold: 0.1, rootMargin: '100px' }
@@ -85,14 +106,26 @@ function App() {
         observer.unobserve(currentTarget)
       }
     }
-  }, [pagination.hasMore, pagination.nextCursor, selectedLetter, fetchUsers])
+  }, [pagination.hasMore, pagination.nextCursor, selectedLetter, searchTerm, fetchUsers])
 
   const handleLetterClick = (letter) => {
     if (selectedLetter === letter) {
       setSelectedLetter('')
     } else {
       setSelectedLetter(letter)
+      setSearchTerm('')
     }
+  }
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value)
+    if (e.target.value.trim()) {
+      setSelectedLetter('')
+    }
+  }
+
+  const handleClearSearch = () => {
+    setSearchTerm('')
   }
 
   return (
@@ -117,6 +150,25 @@ function App() {
         ))}
       </div>
 
+      <div className="search-container">
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search users by name..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+        {searchTerm && (
+          <button
+            className="clear-search"
+            onClick={handleClearSearch}
+            aria-label="Clear search"
+          >
+            ×
+          </button>
+        )}
+      </div>
+
       {error && (
         <div className="error">
           Error: {error}
@@ -127,9 +179,12 @@ function App() {
         <div className="loading">Loading users...</div>
       ) : (
         <>
-          {selectedLetter && users.length === 0 && !loading && (
+          {(selectedLetter || searchTerm.trim()) && users.length === 0 && !loading && (
             <div className="no-results">
-              No users found starting with "{selectedLetter}"
+              {searchTerm.trim() 
+                ? `No users found matching "${searchTerm}"`
+                : `No users found starting with "${selectedLetter}"`
+              }
             </div>
           )}
           
@@ -149,7 +204,12 @@ function App() {
             
             {!pagination.hasMore && users.length > 0 && (
               <div className="end-message">
-                {selectedLetter ? `No more users starting with "${selectedLetter}"` : 'No more users to load'}
+                {searchTerm.trim() 
+                  ? `No more users matching "${searchTerm}"`
+                  : selectedLetter 
+                    ? `No more users starting with "${selectedLetter}"`
+                    : 'No more users to load'
+                }
               </div>
             )}
           </div>
