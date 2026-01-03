@@ -11,6 +11,8 @@ function App() {
   const [error, setError] = useState(null)
   const [selectedLetter, setSelectedLetter] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [uploadSuccess, setUploadSuccess] = useState(false)
   const [pagination, setPagination] = useState({
     nextCursor: null,
     hasMore: false
@@ -18,6 +20,7 @@ function App() {
   const sectionAppeared = useRef(null)
   const loadingRef = useRef(false)
   const debounceTimerRef = useRef(null)
+  const fileInputRef = useRef(null)
 
   const fetchUsers = useCallback(async (cursor = 0, limit = 50, append = false, searchQuery = '') => {
     if (loadingRef.current) return
@@ -128,9 +131,74 @@ function App() {
     setSearchTerm('')
   }
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.name.endsWith('.txt')) {
+      setError('Please upload a .txt file')
+      return
+    }
+
+    setUploading(true)
+    setError(null)
+    setUploadSuccess(false)
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const response = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Upload failed')
+      }
+
+      const data = await response.json()
+      setUploadSuccess(true)
+      setError(null)
+      
+      setTimeout(() => {
+        setUploadSuccess(false)
+        setUsers([])
+        setPagination({ nextCursor: null, hasMore: false })
+        fetchUsers(0, 50, false, selectedLetter || searchTerm.trim())
+      }, 2000)
+    } catch (err) {
+      setError(err.message)
+      setUploadSuccess(false)
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
   return (
     <div className="app">
       <h1>Users List</h1>
+      
+      <div className="upload-section">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".txt"
+          onChange={handleFileUpload}
+          style={{ display: 'none' }}
+          id="file-upload"
+        />
+        <label htmlFor="file-upload" className="upload-button">
+          {uploading ? 'Uploading...' : 'Upload new file'}
+        </label>
+        {uploadSuccess && (
+          <span className="upload-success">✓ File uploaded successfully!</span>
+        )}
+      </div>
       
       <div className="alphabet-menu">
         <button

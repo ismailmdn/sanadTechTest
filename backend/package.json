@@ -16,7 +16,9 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "formidable": "^3.5.4",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "jest": "^29.7.0",

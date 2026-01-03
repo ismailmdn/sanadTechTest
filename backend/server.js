@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import usersRouter from './routes/users.js';
+import uploadRouter from './routes/upload.js';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/users', usersRouter);
+app.use('/upload', uploadRouter);
 
 
 
