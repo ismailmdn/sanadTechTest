@@ -47,3 +47,7 @@ This is the followed steps in the development of this project:
 - The approach I implemented makes reading the file more efficient by creating a file usernames.idx.json. In this file, I store the starting point of each letter (a, b, c, …) along with its byte offset, so the program can start reading directly from that point without processing the entire file.
 
 - The file usernames.idx.json is generated automatically if it does not exist; if it exists, the program uses it.
+
+### Add the upload feature to replace the sample file :
+- give the ability to replace the sample file
+- regenrate the indexfile if the user upload a file
