@@ -29,7 +29,8 @@ export const uploadFile = async (req, res) => {
       return res.status(400).json({ error: 'Only .txt files are allowed' });
     }
 
-    const filePath = join(__dirname, '..', 'usernames.txt');
+    const targetFileName = 'usernames.txt';
+    const filePath = join(__dirname, '..', targetFileName);
     const indexPath = join(__dirname, '..', 'usernames.idx.json');
 
     if (fs.existsSync(indexPath)) {
